@@ -7,7 +7,6 @@ receivers:
           allowed_origins:
             - "http://*"
             - "https://*"
-
 exporters:
   otlp:
     endpoint: "jaeger:4317"
@@ -15,13 +14,11 @@ exporters:
       insecure: true
   logging:
   prometheus:
-    endpoint: "otelcol:9464"
-
+    endpoint: "localhost:9464"
 processors:
   batch:
   spanmetrics:
     metrics_exporter: prometheus
-
 service:
   pipelines:
     traces:
