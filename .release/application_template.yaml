@@ -320,6 +320,13 @@ services:
     initial_delay_seconds: 10
   memory:
     limits: 800Mi
+  ports:
+  - type: container_port
+    port: '9092'
+    loadbalancer: false
+  - type: container_port
+    port: '9093'
+    loadbalancer: false
 - name: loadgenerator
   image: awesome-release/awesome-release-opentelemetry-demo/loadgenerator
   build:
