@@ -250,7 +250,7 @@ services:
   volumes: []
   configmap:
   - mount_path: "/etc/grafana/grafana.ini"
-    repo_path: "././src/grafana/grafana.ini"
+    repo_path: "./src/grafana/grafana.ini"
     name: grafana-ini
   ports:
   - type: container_port
@@ -349,7 +349,7 @@ services:
   volumes: []
   configmap:
   - mount_path: "/etc/otelcol-config.yml"
-    repo_path: "././src/otelcollector/otelcol-config.yml"
+    repo_path: "./src/otelcollector/otelcol-config.yml"
     name: otelcol-config-yml
   - mount_path: "/etc/otelcol-config-extras.yml"
     repo_path: "././src/otelcollector/otelcol-config-extras.yml"
@@ -417,7 +417,7 @@ services:
   volumes: []
   configmap:
   - mount_path: "/etc/prometheus/prometheus-config.yaml"
-    repo_path: "././src/prometheus/prometheus-config.yaml"
+    repo_path: "./src/prometheus/prometheus-config.yaml"
     name: prometheus-config-yaml
   args:
   - "--web.console.templates=/etc/prometheus/consoles"
