@@ -170,7 +170,7 @@ services:
   - key: GRAFANA_SERVICE_PORT
     value: '3000'
   - key: FEATURE_FLAG_SERVICE_HOST
-    value: feature-flag-service
+    value: featureflagservice
   - key: FEATURE_FLAG_SERVICE_PORT
     value: '8081'
   grafana: []
