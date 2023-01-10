@@ -1,2 +1,9 @@
 # extra settings to be merged into OpenTelemetry Collector configuration
 # do not delete this file
+
+# Use localhost instead of otelcol for hostname,
+# because the otelcol hostname does not resolve
+# during deployment
+exporters:
+  prometheus:
+    endpoint: "localhost:9464"
