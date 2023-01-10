@@ -139,8 +139,6 @@ services:
     value: productcatalogservice:3550
   - key: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
     value: http://otelcol:4317
-  - key: PUBLIC_OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
-    value: http://localhost:4318/v1/traces
   frontendTests:
   - key: NODE_ENV
     value: production
@@ -290,4 +288,5 @@ services:
     value: '50050'
   - key: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
     value: http://otelcol:4317
-mapping: {}
+mapping:
+  PUBLIC_OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: "${OTELCOL_INGRESS_URL}/v1/traces"
