@@ -77,7 +77,7 @@ services:
     value: http://otelcol:4318/v1/traces
   featureflagservice:
   - key: DATABASE_URL
-    value: ecto://ffs:ffs@ffs_postgres:5432/ffs
+    value: ecto://ffs:ffs@ffspostgres:5432/ffs
   - key: OTEL_SERVICE_NAME
     value: featureflagservice
   - key: FEATURE_FLAG_SERVICE_PORT
@@ -90,7 +90,7 @@ services:
     value: http://otelcol:4317
   - key: OTEL_EXPORTER_OTLP_TRACES_PROTOCOL
     value: grpc
-  ffs_postgres:
+  ffspostgres:
   - key: POSTGRES_DB
     value: ffs
   - key: POSTGRES_USER

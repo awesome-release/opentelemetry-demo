@@ -137,7 +137,7 @@ services:
   command:
   - "/app/bin/server"
   depends_on:
-  - ffs_postgres
+  - ffspostgres
   ports:
   - type: container_port
     port: '8081'
@@ -147,7 +147,7 @@ services:
     loadbalancer: false
   memory:
     limits: 200Mi
-- name: ffs_postgres
+- name: ffspostgres
   image: postgres:14
   has_repo: false
   readiness_probe:
@@ -490,7 +490,7 @@ workflows:
     tasks:
     - services.jaeger
     - services.redis-cart
-    - services.ffs_postgres
+    - services.ffspostgres
     - services.grafana
     - services.prometheus
   - step: services-1
