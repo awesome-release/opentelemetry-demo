@@ -312,7 +312,7 @@ services:
       command:
       - nc
       - "-z"
-      - kafka
+      - localhost
       - '9092'
     period_seconds: 5
     timeout_seconds: 10
