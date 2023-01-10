@@ -29,7 +29,7 @@ services:
   - "./accountingservice"
   depends_on:
   - otelcol
-  - kafka
+  - kafkaservice
   memory:
     limits: 20Mi
     requests: 10Mi
@@ -82,7 +82,7 @@ services:
   - productcatalogservice
   - shippingservice
   - otelcol
-  - kafka
+  - kafkaservice
   ports:
   - type: container_port
     port: '5050'
@@ -176,7 +176,7 @@ services:
   - frauddetectionservice-1.0-all.jar
   depends_on:
   - otelcol
-  - kafka
+  - kafkaservice
   memory:
     limits: 200Mi
 - name: frontend
@@ -291,7 +291,7 @@ services:
     loadbalancer: false
   memory:
     limits: 275Mi
-- name: kafka
+- name: kafkaservice
   image: awesome-release/awesome-release-opentelemetry-demo/kafka
   build:
     context: "."
@@ -499,7 +499,7 @@ workflows:
     - services.featureflagservice
   - step: services-2
     tasks:
-    - services.kafka
+    - services.kafkaservice
     - services.adservice
     - services.cartservice
     - services.currencyservice
@@ -529,7 +529,7 @@ workflows:
   parallelize:
   - step: services-0
     tasks:
-    - services.kafka
+    - services.kafkaservice
     - services.adservice
     - services.cartservice
     - services.currencyservice

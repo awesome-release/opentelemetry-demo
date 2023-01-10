@@ -5,7 +5,7 @@ services:
   - key: OTEL_SERVICE_NAME
     value: accountingservice
   - key: KAFKA_SERVICE_ADDR
-    value: kafka:9092
+    value: kafkaservice:9092
   - key: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
     value: http://otelcol:4317
   - key: OTEL_EXPORTER_OTLP_METRICS_ENDPOINT
@@ -42,7 +42,7 @@ services:
   - key: EMAIL_SERVICE_ADDR
     value: http://emailservice:6060
   - key: KAFKA_SERVICE_ADDR
-    value: kafka:9092
+    value: kafkaservice:9092
   - key: PAYMENT_SERVICE_ADDR
     value: paymentservice:50051
   - key: CHECKOUT_SERVICE_PORT
@@ -101,7 +101,7 @@ services:
   - key: OTEL_SERVICE_NAME
     value: frauddetectionservice
   - key: KAFKA_SERVICE_ADDR
-    value: kafka:9092
+    value: kafkaservice:9092
   - key: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
     value: http://otelcol:4317
   - key: OTEL_EXPORTER_OTLP_METRICS_ENDPOINT
@@ -200,11 +200,11 @@ services:
     value: prometheus
   - key: COLLECTOR_OTLP_ENABLED
     value: 'true'
-  kafka:
+  kafkaservice:
   - key: OTEL_SERVICE_NAME
-    value: kafka
+    value: kafkaservice
   - key: KAFKA_ADVERTISED_LISTENERS
-    value: PLAINTEXT://kafka:9092
+    value: PLAINTEXT://kafkaservice:9092
   - key: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
     value: http://otelcol:4317
   - key: OTEL_EXPORTER_OTLP_METRICS_ENDPOINT
