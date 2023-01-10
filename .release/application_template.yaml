@@ -164,6 +164,10 @@ services:
     initial_delay_seconds: 0
   memory:
     limits: 200Mi
+  ports:
+  - type: container_port
+    port: '5432'
+    loadbalancer: false
 - name: frauddetectionservice
   image: awesome-release/awesome-release-opentelemetry-demo/frauddetectionservice
   build:
