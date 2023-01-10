@@ -1,0 +1,563 @@
+---
+auto_deploy: true
+context: release-cluster                    # Replace cluster name
+domain: rls.sh                              # Replace domain
+repo_name: awesome-release/awesome-release-opentelemetry-demo
+hostnames:
+- frontendproxy: frontendproxy-otel2-${env_id}.${domain}
+- otelcol: otelcol-otel2-${env_id}.${domain}
+- prometheus: prometheus-otel2-${env_id}.${domain}
+environment_templates:
+- name: ephemeral
+- name: permanent
+resources:
+  cpu:
+    limits: 1000m
+    requests: 100m
+  memory:
+    limits: 1Gi
+    requests: 100Mi
+  replicas: 1
+services:
+- name: accountingservice
+  image: awesome-release/awesome-release-opentelemetry-demo/accountingservice
+  build:
+    context: "."
+    dockerfile: "./src/accountingservice/Dockerfile"
+  has_repo: true
+  command:
+  - "./accountingservice"
+  depends_on:
+  - otelcol
+  - kafka
+  memory:
+    limits: 20Mi
+    requests: 10Mi
+- name: adservice
+  image: awesome-release/awesome-release-opentelemetry-demo/adservice
+  build:
+    context: "."
+    dockerfile: "./src/adservice/Dockerfile"
+  has_repo: true
+  command:
+  - "./build/install/hipstershop/bin/AdService"
+  depends_on:
+  - otelcol
+  ports:
+  - type: container_port
+    port: '9555'
+    loadbalancer: false
+  memory:
+    limits: 300Mi
+- name: cartservice
+  image: awesome-release/awesome-release-opentelemetry-demo/cartservice
+  build:
+    context: "."
+    dockerfile: "./src/cartservice/src/Dockerfile"
+  has_repo: true
+  command:
+  - "./cartservice"
+  depends_on:
+  - redis-cart
+  - otelcol
+  ports:
+  - type: container_port
+    port: '7070'
+    loadbalancer: false
+  memory:
+    limits: 160Mi
+- name: checkoutservice
+  image: awesome-release/awesome-release-opentelemetry-demo/checkoutservice
+  build:
+    context: "."
+    dockerfile: "./src/checkoutservice/Dockerfile"
+  has_repo: true
+  command:
+  - "./checkoutservice"
+  depends_on:
+  - cartservice
+  - currencyservice
+  - emailservice
+  - paymentservice
+  - productcatalogservice
+  - shippingservice
+  - otelcol
+  - kafka
+  ports:
+  - type: container_port
+    port: '5050'
+    loadbalancer: false
+  memory:
+    limits: 20Mi
+    requests: 10Mi
+- name: currencyservice
+  image: awesome-release/awesome-release-opentelemetry-demo/currencyservice
+  build:
+    args:
+    - GRPC_VERSION=1.46.0
+    - OPENTELEMETRY_VERSION=1.5.0
+    context: src/currencyservice
+  has_repo: true
+  command:
+  - "/usr/local/bin/currencyservice"
+  - '7001'
+  depends_on:
+  - otelcol
+  ports:
+  - type: container_port
+    port: '7001'
+    loadbalancer: false
+  memory:
+    limits: 20Mi
+    requests: 10Mi
+- name: emailservice
+  image: awesome-release/awesome-release-opentelemetry-demo/emailservice
+  build:
+    context: src/emailservice
+  has_repo: true
+  command:
+  - bundle
+  - exec
+  - ruby
+  - email_server.rb
+  depends_on:
+  - otelcol
+  ports:
+  - type: container_port
+    port: '6060'
+    loadbalancer: false
+  memory:
+    limits: 100Mi
+- name: featureflagservice
+  image: awesome-release/awesome-release-opentelemetry-demo/featureflagservice
+  build:
+    context: "."
+    dockerfile: "./src/featureflagservice/Dockerfile"
+  has_repo: true
+  command:
+  - "/app/bin/server"
+  depends_on:
+  - ffs_postgres
+  ports:
+  - type: container_port
+    port: '8081'
+    loadbalancer: false
+  - type: container_port
+    port: '50053'
+    loadbalancer: false
+  memory:
+    limits: 200Mi
+- name: ffs_postgres
+  image: postgres:14
+  has_repo: false
+  readiness_probe:
+    exec:
+      command:
+      - pg_isready
+      - "-d"
+      - ffs
+      - "-U"
+      - ffs
+    period_seconds: 10
+    timeout_seconds: 5
+    failure_threshold: 5
+    initial_delay_seconds: 0
+  memory:
+    limits: 200Mi
+- name: frauddetectionservice
+  image: awesome-release/awesome-release-opentelemetry-demo/frauddetectionservice
+  build:
+    context: "."
+    dockerfile: "./src/frauddetectionservice/Dockerfile"
+  has_repo: true
+  command:
+  - java
+  - "-jar"
+  - frauddetectionservice-1.0-all.jar
+  depends_on:
+  - otelcol
+  - kafka
+  memory:
+    limits: 200Mi
+- name: frontend
+  image: awesome-release/awesome-release-opentelemetry-demo/frontend
+  build:
+    context: "."
+    dockerfile: "./src/frontend/Dockerfile"
+  has_repo: true
+  command:
+  - npm
+  - start
+  depends_on:
+  - adservice
+  - cartservice
+  - checkoutservice
+  - currencyservice
+  - otelcol
+  - productcatalogservice
+  - quoteservice
+  - recommendationservice
+  - shippingservice
+  ports:
+  - type: container_port
+    port: '8080'
+    loadbalancer: false
+  memory:
+    limits: 200Mi
+- name: frontendTests
+  image: awesome-release/awesome-release-opentelemetry-demo/frontendTests
+  build:
+    context: "."
+    dockerfile: "./src/frontend/Dockerfile.cypress"
+  has_repo: true
+  volumes: []
+  command:
+  - cypress
+  - run
+  depends_on:
+  - frontend
+- name: frontendproxy
+  image: awesome-release/awesome-release-opentelemetry-demo/frontendproxy
+  build:
+    context: "."
+    dockerfile: src/frontendproxy/Dockerfile
+  has_repo: true
+  command:
+  - "/bin/sh"
+  - "-c"
+  - envsubst < envoy.tmpl.yaml > envoy.yaml && envoy -c envoy.yaml;
+  depends_on:
+  - frontend
+  - featureflagservice
+  - loadgenerator
+  - grafana
+  ports:
+  - type: node_port
+    target_port: '8080'
+    port: '8080'
+    loadbalancer: false
+  - type: node_port
+    target_port: '10000'
+    port: '10000'
+    loadbalancer: false
+- name: grafana
+  image: grafana/grafana:9.1.0
+  has_repo: false
+  volumes: []
+  configmap:
+  - mount_path: "/etc/grafana/grafana.ini"
+    repo_path: "././src/grafana/grafana.ini"
+    name: grafana-ini
+  ports:
+  - type: container_port
+    port: '3000'
+    loadbalancer: false
+- name: integrationTests
+  image: awesome-release/awesome-release-opentelemetry-demo/integrationTests
+  build:
+    context: "."
+    dockerfile: "./test/Dockerfile"
+  has_repo: true
+  command:
+  - npm
+  - test
+  depends_on:
+  - adservice
+  - cartservice
+  - checkoutservice
+  - currencyservice
+  - emailservice
+  - paymentservice
+  - productcatalogservice
+  - recommendationservice
+  - shippingservice
+  - quoteservice
+- name: jaeger
+  image: jaegertracing/all-in-one
+  has_repo: false
+  args:
+  - "--memory.max-traces"
+  - '10000'
+  - "--query.base-path"
+  - "/jaeger/ui"
+  - "--prometheus.server-url"
+  - http://prometheus:9090
+  ports:
+  - type: container_port
+    port: '16686'
+    loadbalancer: false
+  - type: container_port
+    port: '4317'
+    loadbalancer: false
+  memory:
+    limits: 275Mi
+- name: kafka
+  image: awesome-release/awesome-release-opentelemetry-demo/kafka
+  build:
+    context: "."
+    dockerfile: "./src/kafka/Dockerfile"
+  has_repo: true
+  command:
+  - "/bin/sh"
+  - "-c"
+  - ls -lh /tmp && /tmp/update_run.sh && /etc/confluent/docker/run
+  depends_on:
+  - otelcol
+  readiness_probe:
+    exec:
+      command:
+      - nc
+      - "-z"
+      - kafka
+      - '9092'
+    period_seconds: 5
+    timeout_seconds: 10
+    failure_threshold: 10
+    initial_delay_seconds: 10
+  memory:
+    limits: 800Mi
+- name: loadgenerator
+  image: awesome-release/awesome-release-opentelemetry-demo/loadgenerator
+  build:
+    context: "."
+    dockerfile: "./src/loadgenerator/Dockerfile"
+  has_repo: true
+  command:
+  - locust
+  depends_on:
+  - frontend
+  ports:
+  - type: container_port
+    port: '8089'
+    loadbalancer: false
+  memory:
+    limits: 120Mi
+- name: otelcol
+  image: otel/opentelemetry-collector-contrib:0.61.0
+  has_repo: false
+  volumes: []
+  configmap:
+  - mount_path: "/etc/otelcol-config.yml"
+    repo_path: "././src/otelcollector/otelcol-config.yml"
+    name: otelcol-config-yml
+  - mount_path: "/etc/otelcol-config-extras.yml"
+    repo_path: "././src/otelcollector/otelcol-config-extras.yml"
+    name: otelcol-config-extras-yml
+  args:
+  - "--config=/etc/otelcol-config.yml"
+  - "--config=/etc/otelcol-config-extras.yml"
+  depends_on:
+  - jaeger
+  ports:
+  - type: container_port
+    port: '4317'
+    loadbalancer: false
+  - type: node_port
+    target_port: '4318'
+    port: '4318'
+    loadbalancer: false
+  - type: container_port
+    port: '9464'
+    loadbalancer: false
+  - type: container_port
+    port: '8888'
+    loadbalancer: false
+  memory:
+    limits: 100Mi
+- name: paymentservice
+  image: awesome-release/awesome-release-opentelemetry-demo/paymentservice
+  build:
+    context: "."
+    dockerfile: "./src/paymentservice/Dockerfile"
+  has_repo: true
+  command:
+  - npm
+  - run
+  - start
+  depends_on:
+  - otelcol
+  ports:
+  - type: container_port
+    port: '50051'
+    loadbalancer: false
+  memory:
+    limits: 70Mi
+    requests: 35Mi
+- name: productcatalogservice
+  image: awesome-release/awesome-release-opentelemetry-demo/productcatalogservice
+  build:
+    context: "."
+    dockerfile: "./src/productcatalogservice/Dockerfile"
+  has_repo: true
+  command:
+  - "./productcatalogservice"
+  depends_on:
+  - otelcol
+  ports:
+  - type: container_port
+    port: '3550'
+    loadbalancer: false
+  memory:
+    limits: 20Mi
+    requests: 10Mi
+- name: prometheus
+  image: quay.io/prometheus/prometheus:v2.34.0
+  has_repo: false
+  volumes: []
+  configmap:
+  - mount_path: "/etc/prometheus/prometheus-config.yaml"
+    repo_path: "././src/prometheus/prometheus-config.yaml"
+    name: prometheus-config-yaml
+  args:
+  - "--web.console.templates=/etc/prometheus/consoles"
+  - "--web.console.libraries=/etc/prometheus/console_libraries"
+  - "--storage.tsdb.retention.time=1h"
+  - "--config.file=/etc/prometheus/prometheus-config.yaml"
+  - "--storage.tsdb.path=/prometheus"
+  - "--web.enable-lifecycle"
+  - "--web.route-prefix=/"
+  ports:
+  - type: node_port
+    target_port: '9090'
+    port: '9090'
+    loadbalancer: false
+- name: quoteservice
+  image: awesome-release/awesome-release-opentelemetry-demo/quoteservice
+  build:
+    context: "."
+    dockerfile: "./src/quoteservice/Dockerfile"
+  has_repo: true
+  depends_on:
+  - otelcol
+  ports:
+  - type: container_port
+    port: '8090'
+    loadbalancer: false
+  memory:
+    limits: 30Mi
+    requests: 15Mi
+- name: recommendationservice
+  image: awesome-release/awesome-release-opentelemetry-demo/recommendationservice
+  build:
+    context: "."
+    dockerfile: "./src/recommendationservice/Dockerfile"
+  has_repo: true
+  command:
+  - opentelemetry-instrument
+  - python
+  - recommendation_server.py
+  depends_on:
+  - productcatalogservice
+  - otelcol
+  - featureflagservice
+  ports:
+  - type: container_port
+    port: '9001'
+    loadbalancer: false
+  memory:
+    limits: 500Mi
+- name: redis-cart
+  image: redis:alpine
+  has_repo: false
+  ports:
+  - type: container_port
+    port: '6379'
+    loadbalancer: false
+  memory:
+    limits: 20Mi
+    requests: 10Mi
+- name: shippingservice
+  image: awesome-release/awesome-release-opentelemetry-demo/shippingservice
+  build:
+    context: "."
+    dockerfile: "./src/shippingservice/Dockerfile"
+  has_repo: true
+  command:
+  - "/app/shippingservice"
+  depends_on:
+  - otelcol
+  ports:
+  - type: container_port
+    port: '50050'
+    loadbalancer: false
+  memory:
+    limits: 20Mi
+    requests: 10Mi
+workflows:
+- name: setup
+  parallelize:
+  - step: services-0
+    tasks:
+    - services.jaeger
+    - services.redis-cart
+    - services.ffs_postgres
+    - services.grafana
+    - services.prometheus
+  - step: services-1
+    tasks:
+    - services.otelcol
+    - services.featureflagservice
+  - step: services-2
+    tasks:
+    - services.kafka
+    - services.adservice
+    - services.cartservice
+    - services.currencyservice
+    - services.emailservice
+    - services.paymentservice
+    - services.productcatalogservice
+    - services.shippingservice
+    - services.quoteservice
+  - step: services-3
+    tasks:
+    - services.accountingservice
+    - services.checkoutservice
+    - services.frauddetectionservice
+    - services.recommendationservice
+  - step: services-4
+    tasks:
+    - services.frontend
+    - services.integrationTests
+  - step: services-5
+    tasks:
+    - services.frontendTests
+    - services.loadgenerator
+  - step: services-6
+    tasks:
+    - services.frontendproxy
+- name: patch
+  parallelize:
+  - step: services-0
+    tasks:
+    - services.kafka
+    - services.adservice
+    - services.cartservice
+    - services.currencyservice
+    - services.emailservice
+    - services.paymentservice
+    - services.productcatalogservice
+    - services.shippingservice
+    - services.featureflagservice
+    - services.quoteservice
+  - step: services-1
+    tasks:
+    - services.accountingservice
+    - services.checkoutservice
+    - services.frauddetectionservice
+    - services.recommendationservice
+  - step: services-2
+    tasks:
+    - services.frontend
+    - services.integrationTests
+  - step: services-3
+    tasks:
+    - services.frontendTests
+    - services.loadgenerator
+  - step: services-4
+    tasks:
+    - services.frontendproxy
+- name: teardown
+  parallelize:
+  - step: remove-environment
+    tasks:
+    - release.remove_environment
