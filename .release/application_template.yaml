@@ -252,6 +252,21 @@ services:
   - mount_path: "/etc/grafana/grafana.ini"
     repo_path: "./src/grafana/grafana.ini"
     name: grafana-ini
+  - mount_path: "/etc/grafana/provisioning/dashboards/general.yaml"
+    repo_path: "./src/grafana/provisioning/dashboards/general.yaml"
+    name: grafana-general-yaml
+  - mount_path: "/etc/grafana/provisioning/dashboards/general/demo-dashboard.json"
+    repo_path: "./src/grafana/provisioning/dashboards/general/demo-dashboard.json"
+    name: grafana-general-demo-dashboard-json
+  - mount_path: "/etc/grafana/provisioning/dashboards/general/opentelemetry-collector.json"
+    repo_path: "./src/grafana/provisioning/dashboards/general/opentelemetry-collector.json"
+    name: grafana-general-otel-collector-json
+  - mount_path: "/etc/grafana/provisioning/datasources/default.yaml"
+    repo_path: "./src/grafana/provisioning/datasources/default.yaml"
+    name: grafana-datasources-default-yaml
+  - mount_path: "/etc/grafana/provisioning/datasources/jaeger.yaml"
+    repo_path: "./src/grafana/provisioning/datasources/jaeger.yaml"
+    name: grafana-datasources-jaeger-yaml
   ports:
   - type: container_port
     port: '3000'
