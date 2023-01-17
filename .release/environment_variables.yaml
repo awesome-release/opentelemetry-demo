@@ -1,0 +1,292 @@
+---
+defaults: []
+services:
+  accountingservice:
+  - key: OTEL_SERVICE_NAME
+    value: accountingservice
+  - key: KAFKA_SERVICE_ADDR
+    value: kafkaservice:9092
+  - key: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+    value: http://otelcol:4317
+  - key: OTEL_EXPORTER_OTLP_METRICS_ENDPOINT
+    value: http://otelcol:4317
+  - key: OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
+    value: cumulative
+  adservice:
+  - key: AD_SERVICE_PORT
+    value: '9555'
+  - key: OTEL_SERVICE_NAME
+    value: adservice
+  - key: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+    value: http://otelcol:4317
+  - key: OTEL_EXPORTER_OTLP_METRICS_ENDPOINT
+    value: http://otelcol:4317
+  - key: OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
+    value: cumulative
+  cartservice:
+  - key: REDIS_ADDR
+    value: redis-cart:6379
+  - key: ASPNETCORE_URLS
+    value: http://*:7070
+  - key: CART_SERVICE_PORT
+    value: '7070'
+  - key: OTEL_SERVICE_NAME
+    value: cartservice
+  - key: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: http://otelcol:4317
+  checkoutservice:
+  - key: CART_SERVICE_ADDR
+    value: cartservice:7070
+  - key: OTEL_SERVICE_NAME
+    value: checkoutservice
+  - key: EMAIL_SERVICE_ADDR
+    value: http://emailservice:6060
+  - key: KAFKA_SERVICE_ADDR
+    value: kafkaservice:9092
+  - key: PAYMENT_SERVICE_ADDR
+    value: paymentservice:50051
+  - key: CHECKOUT_SERVICE_PORT
+    value: '5050'
+  - key: CURRENCY_SERVICE_ADDR
+    value: currencyservice:7001
+  - key: SHIPPING_SERVICE_ADDR
+    value: shippingservice:50050
+  - key: PRODUCT_CATALOG_SERVICE_ADDR
+    value: productcatalogservice:3550
+  - key: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+    value: http://otelcol:4317
+  - key: OTEL_EXPORTER_OTLP_METRICS_ENDPOINT
+    value: http://otelcol:4317
+  - key: OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
+    value: cumulative
+  currencyservice:
+  - key: CURRENCY_SERVICE_PORT
+    value: '7001'
+  - key: OTEL_RESOURCE_ATTRIBUTES
+    value: service.name=currencyservice
+  - key: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+    value: http://otelcol:4317
+  emailservice:
+  - key: APP_ENV
+    value: production
+  - key: OTEL_SERVICE_NAME
+    value: emailservice
+  - key: EMAIL_SERVICE_PORT
+    value: '6060'
+  - key: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+    value: http://otelcol:4318/v1/traces
+  featureflagservice:
+  - key: DATABASE_URL
+    value: ecto://ffs:ffs@ffspostgres:5432/ffs
+  - key: OTEL_SERVICE_NAME
+    value: featureflagservice
+  - key: FEATURE_FLAG_SERVICE_PORT
+    value: '8081'
+  - key: FEATURE_FLAG_GRPC_SERVICE_PORT
+    value: '50053'
+  - key: FEATURE_FLAG_SERVICE_PATH_ROOT
+    value: '"/feature"'
+  - key: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+    value: http://otelcol:4317
+  - key: OTEL_EXPORTER_OTLP_TRACES_PROTOCOL
+    value: grpc
+  ffspostgres:
+  - key: POSTGRES_DB
+    value: ffs
+  - key: POSTGRES_USER
+    value: ffs
+  - key: POSTGRES_PASSWORD
+    value: ffs
+  frauddetectionservice:
+  - key: OTEL_SERVICE_NAME
+    value: frauddetectionservice
+  - key: KAFKA_SERVICE_ADDR
+    value: kafkaservice:9092
+  - key: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+    value: http://otelcol:4317
+  - key: OTEL_EXPORTER_OTLP_METRICS_ENDPOINT
+    value: http://otelcol:4317
+  - key: OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
+    value: cumulative
+  frontend:
+  - key: PORT
+    value: '8080'
+  - key: ENV_PLATFORM
+    value: local
+  - key: FRONTEND_ADDR
+    value: frontend:8080
+  - key: AD_SERVICE_ADDR
+    value: adservice:9555
+  - key: CART_SERVICE_ADDR
+    value: cartservice:7070
+  - key: OTEL_SERVICE_NAME
+    value: frontend
+  - key: CHECKOUT_SERVICE_ADDR
+    value: checkoutservice:5050
+  - key: CURRENCY_SERVICE_ADDR
+    value: currencyservice:7001
+  - key: SHIPPING_SERVICE_ADDR
+    value: shippingservice:50050
+  - key: WEB_OTEL_SERVICE_NAME
+    value: frontend-web
+  - key: OTEL_RESOURCE_ATTRIBUTES
+    value: service.name=frontend
+  - key: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: http://otelcol:4317
+  - key: RECOMMENDATION_SERVICE_ADDR
+    value: recommendationservice:9001
+  - key: PRODUCT_CATALOG_SERVICE_ADDR
+    value: productcatalogservice:3550
+  - key: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+    value: http://otelcol:4317
+  frontendTests:
+  - key: NODE_ENV
+    value: production
+  - key: FRONTEND_ADDR
+    value: frontend:8080
+  - key: CYPRESS_baseUrl
+    value: http://frontend:8080
+  frontendproxy:
+  - key: ENVOY_PORT
+    value: '8080'
+  - key: FRONTEND_HOST
+    value: frontend
+  - key: FRONTEND_PORT
+    value: '8080'
+  - key: LOCUST_WEB_HOST
+    value: loadgenerator
+  - key: LOCUST_WEB_PORT
+    value: '8089'
+  - key: JAEGER_SERVICE_HOST
+    value: jaeger
+  - key: JAEGER_SERVICE_PORT
+    value: '16686'
+  - key: OTEL_COLLECTOR_HOST
+    value: otelcol
+  - key: OTEL_COLLECTOR_PORT
+    value: '4317'
+  - key: GRAFANA_SERVICE_HOST
+    value: grafana
+  - key: GRAFANA_SERVICE_PORT
+    value: '3000'
+  - key: FEATURE_FLAG_SERVICE_HOST
+    value: featureflagservice
+  - key: FEATURE_FLAG_SERVICE_PORT
+    value: '8081'
+  grafana: []
+  integrationTests:
+  - key: AD_SERVICE_ADDR
+    value: adservice:9555
+  - key: CART_SERVICE_ADDR
+    value: cartservice:7070
+  - key: EMAIL_SERVICE_ADDR
+    value: http://emailservice:6060
+  - key: PAYMENT_SERVICE_ADDR
+    value: paymentservice:50051
+  - key: CHECKOUT_SERVICE_ADDR
+    value: checkoutservice:5050
+  - key: CURRENCY_SERVICE_ADDR
+    value: currencyservice:7001
+  - key: SHIPPING_SERVICE_ADDR
+    value: shippingservice:50050
+  - key: RECOMMENDATION_SERVICE_ADDR
+    value: recommendationservice:9001
+  - key: PRODUCT_CATALOG_SERVICE_ADDR
+    value: productcatalogservice:3550
+  jaeger:
+  - key: METRICS_STORAGE_TYPE
+    value: prometheus
+  - key: COLLECTOR_OTLP_ENABLED
+    value: 'true'
+  kafkaservice:
+  - key: OTEL_SERVICE_NAME
+    value: kafkaservice
+  - key: KAFKA_ADVERTISED_LISTENERS
+    value: PLAINTEXT://kafkaservice:9092
+  - key: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+    value: http://otelcol:4317
+  - key: OTEL_EXPORTER_OTLP_METRICS_ENDPOINT
+    value: http://otelcol:4317
+  - key: OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
+    value: cumulative
+  loadgenerator:
+  - key: LOCUST_HOST
+    value: http://frontend:8080
+  - key: LOCUST_USERS
+    value: '10'
+  - key: LOCUST_HEADLESS
+    value: 'false'
+  - key: LOCUST_WEB_PORT
+    value: '8089'
+  - key: LOCUST_AUTOSTART
+    value: 'true'
+  - key: OTEL_SERVICE_NAME
+    value: loadgenerator
+  - key: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+    value: http://otelcol:4317
+  - key: PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION
+    value: python
+  otelcol: []
+  paymentservice:
+  - key: OTEL_SERVICE_NAME
+    value: paymentservice
+  - key: PAYMENT_SERVICE_PORT
+    value: '50051'
+  - key: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+    value: http://otelcol:4317
+  - key: OTEL_EXPORTER_OTLP_METRICS_ENDPOINT
+    value: http://otelcol:4317
+  - key: OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
+    value: cumulative
+  productcatalogservice:
+  - key: OTEL_SERVICE_NAME
+    value: productcatalogservice
+  - key: PRODUCT_CATALOG_SERVICE_PORT
+    value: '3550'
+  - key: FEATURE_FLAG_GRPC_SERVICE_ADDR
+    value: featureflagservice:50053
+  - key: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+    value: http://otelcol:4317
+  prometheus: []
+  quoteservice:
+  - key: OTEL_SERVICE_NAME
+    value: quoteservice
+  - key: QUOTE_SERVICE_PORT
+    value: '8090'
+  - key: OTEL_PHP_AUTOLOAD_ENABLED
+    value: 'true'
+  - key: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+    value: http://otelcol:4318/v1/traces
+  recommendationservice:
+  - key: OTEL_SERVICE_NAME
+    value: recommendationservice
+  - key: OTEL_TRACES_EXPORTER
+    value: otlp
+  - key: OTEL_METRICS_EXPORTER
+    value: otlp
+  - key: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: http://otelcol:4317
+  - key: OTEL_PYTHON_LOG_CORRELATION
+    value: 'true'
+  - key: RECOMMENDATION_SERVICE_PORT
+    value: '9001'
+  - key: PRODUCT_CATALOG_SERVICE_ADDR
+    value: productcatalogservice:3550
+  - key: FEATURE_FLAG_GRPC_SERVICE_ADDR
+    value: featureflagservice:50053
+  - key: PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION
+    value: python
+  - key: OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
+    value: cumulative
+  redis-cart: []
+  shippingservice:
+  - key: OTEL_SERVICE_NAME
+    value: shippingservice
+  - key: QUOTE_SERVICE_ADDR
+    value: http://quoteservice:8090
+  - key: SHIPPING_SERVICE_PORT
+    value: '50050'
+  - key: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+    value: http://otelcol:4317
+mapping:
+  PUBLIC_OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: "${OTELCOL_INGRESS_URL}/v1/traces"
